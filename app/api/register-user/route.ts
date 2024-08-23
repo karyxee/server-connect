@@ -1,13 +1,15 @@
-import { clerkClient } from '@clerk/nextjs';
-import { StreamChat } from 'stream-chat';
+import { clerkClient } from "@clerk/nextjs";
+import { StreamChat } from "stream-chat";
 
 export async function POST(request: Request) {
   const serverClient = StreamChat.getInstance(
-    '7cu55d72xtjs',
+    process.env.NEXT_PUBLIC_STREAM_API_KEY != undefined
+      ? process.env.NEXT_PUBLIC_STREAM_API_KEY
+      : "",
     process.env.STREAM_CHAT_SECRET
   );
   const body = await request.json();
-  console.log('[/api/register-user] Body:', body);
+  console.log("[/api/register-user] Body:", body);
 
   const userId = body?.userId;
   const mail = body?.email;
@@ -18,7 +20,7 @@ export async function POST(request: Request) {
 
   const user = await serverClient.upsertUser({
     id: userId,
-    role: 'user',
+    role: "user",
     name: mail,
     imageUrl: `https://getstream.io/random_png/?id=${userId}&name=${mail}`,
   });
@@ -30,7 +32,7 @@ export async function POST(request: Request) {
   };
   const updatedUser = await clerkClient.users.updateUser(userId, params);
 
-  console.log('[/api/register-user] User:', updatedUser);
+  console.log("[/api/register-user] User:", updatedUser);
   const response = {
     userId: userId,
     userName: mail,

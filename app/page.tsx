@@ -1,18 +1,16 @@
-'use client';
+"use client";
 
-import { User } from 'stream-chat';
-import { LoadingIndicator } from 'stream-chat-react';
+import { User } from "stream-chat";
+import { LoadingIndicator } from "stream-chat-react";
 
-import { useClerk } from '@clerk/nextjs';
-import { useCallback, useEffect, useState } from 'react';
-import MyChat from '@/components/MyChat';
+import { useClerk } from "@clerk/nextjs";
+import { useCallback, useEffect, useState } from "react";
+import MyChat from "@/components/MyChat";
 
-// const userId = '7cd445eb-9af2-4505-80a9-aa8543c3343f';
-// const userName = 'Harry Potter';
-
-const apiKey = '7cu55d72xtjs';
-// const userToken =
-//   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiN2NkNDQ1ZWItOWFmMi00NTA1LTgwYTktYWE4NTQzYzMzNDNmIn0.TtrCA5VoRB2KofI3O6lYjYZd2pHdQT408u7ryeWO4Qg';
+const apiKey =
+  process.env.NEXT_PUBLIC_STREAM_API_KEY != undefined
+    ? process.env.NEXT_PUBLIC_STREAM_API_KEY
+    : "";
 
 export type DiscordServer = {
   name: string;
@@ -33,14 +31,14 @@ export default function Home() {
   const registerUser = useCallback(
     async function registerUser() {
       // register user on Stream backend
-      console.log('[registerUser] myUser:', myUser);
+      console.log("[registerUser] myUser:", myUser);
       const userId = myUser?.id;
       const mail = myUser?.primaryEmailAddress?.emailAddress;
       if (userId && mail) {
-        const streamResponse = await fetch('/api/register-user', {
-          method: 'POST',
+        const streamResponse = await fetch("/api/register-user", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             userId: userId,
@@ -48,7 +46,7 @@ export default function Home() {
           }),
         });
         const responseBody = await streamResponse.json();
-        console.log('[registerUser] Stream response:', responseBody);
+        console.log("[registerUser] Stream response:", responseBody);
         return responseBody;
       }
     },
@@ -61,24 +59,24 @@ export default function Home() {
       myUser?.primaryEmailAddress?.emailAddress &&
       !myUser?.publicMetadata.streamRegistered
     ) {
-      console.log('[Page - useEffect] Registering user on Stream backend');
+      console.log("[Page - useEffect] Registering user on Stream backend");
       registerUser().then((result) => {
-        console.log('[Page - useEffect] Result: ', result);
+        console.log("[Page - useEffect] Result: ", result);
         getUserToken(
           myUser.id,
-          myUser?.primaryEmailAddress?.emailAddress || 'Unknown'
+          myUser?.primaryEmailAddress?.emailAddress || "Unknown"
         );
       });
     } else {
       // take user and get token
       if (myUser?.id) {
         console.log(
-          '[Page - useEffect] User already registered on Stream backend: ',
+          "[Page - useEffect] User already registered on Stream backend: ",
           myUser?.id
         );
         getUserToken(
-          myUser?.id || 'Unknown',
-          myUser?.primaryEmailAddress?.emailAddress || 'Unknown'
+          myUser?.id || "Unknown",
+          myUser?.primaryEmailAddress?.emailAddress || "Unknown"
         );
       }
     }
@@ -91,10 +89,10 @@ export default function Home() {
   return <MyChat {...myState} />;
 
   async function getUserToken(userId: string, userName: string) {
-    const response = await fetch('/api/token', {
-      method: 'POST',
+    const response = await fetch("/api/token", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         userId: userId,
