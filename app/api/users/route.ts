@@ -1,3 +1,5 @@
+export const dynamic = "force-dynamic";
+
 import { UserObject } from "@/model/UserObject";
 import { StreamChat } from "stream-chat";
 
