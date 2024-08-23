@@ -53,7 +53,7 @@ const ServerList = () => {
         }`}
         onClick={() => changeServer(undefined, client)}
       >
-        <div className="rounded-icon discord-icon"></div>
+        <div>SC</div>
       </button>
       <div className="border-t-2 border-t-gray-300">
         {serverList.map((server) => {
