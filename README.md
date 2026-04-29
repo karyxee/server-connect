@@ -1,68 +1,77 @@
-# Server Connect - WebRTC Video Chat
+# Server Connect
 
-Server Connect is a real-time video and audio chat application that allows users to connect with each other in two ways: by sharing a personal code or by connecting with a random stranger. It uses WebRTC for peer-to-peer communication, ensuring low-latency connections.
-
------
+Real-time peer-to-peer video and chat application. Users connect via a personal code or get matched with a random stranger. All audio/video streams flow directly between browsers over WebRTC — the server only handles signaling.
 
 ## Features
 
-  * **Direct Calling**: Connect with a friend by sharing your unique "Personal Code".
-  * **Stranger Connect**: Opt-in to be discoverable and connect with another random user who is also looking to chat.
-  * **Real-time Communication**: High-quality video and audio streaming directly between users.
-  * **Simple Interface**: A clean and easy-to-use interface for a seamless user experience.
-
------
+- **Personal code calls** — share your code with a friend to start a video or audio call
+- **Stranger matching** — opt in to the stranger pool and get paired randomly
+- **Screen sharing** — switch between camera and display during a video call
+- **In-call chat** — text messages over a WebRTC data channel (no server involvement)
+- **Call recording** — record the remote stream and download as `.webm`
 
 ## Tech Stack
 
-  * **Frontend**: HTML, CSS, vanilla JavaScript
-  * **Backend**: Node.js, Express.js
-  * **Signaling**: Socket.IO
-  * **Peer-to-Peer Connection**: WebRTC
+| Layer | Tech |
+|---|---|
+| Backend | Python · FastAPI · python-socketio · uvicorn |
+| Frontend | React 18 · Vite · Tailwind CSS · Zustand |
+| Real-time | Socket.IO (signaling only) |
+| P2P | WebRTC (RTCPeerConnection + data channel) |
 
------
+## Project Structure
 
-## How It Works
+```
+server-connect/
+├── backend/
+│   ├── main.py           # FastAPI app + all Socket.IO signaling handlers
+│   ├── requirements.txt
+│   └── .env.example
+└── frontend/
+    ├── src/
+    │   ├── App.jsx
+    │   ├── constants.js
+    │   ├── components/   # Dashboard, VideoPanel, ChatPanel, Dialogs
+    │   ├── hooks/        # useSocket, useWebRTC, useMediaStream, useRecording
+    │   └── store/        # Zustand store
+    ├── vite.config.js    # proxies /socket.io → backend in dev
+    └── package.json
+```
 
-This application uses a Node.js server with Socket.IO as a **signaling server**. The server does not process the video or audio streams but is responsible for setting up the call.
+## Local Development
 
-1.  When a user opens the application, they connect to the Socket.IO server and receive a unique ID.
-2.  To call a friend, one user shares their ID with another. The application sends a "call offer" through the signaling server to the specified ID.
-3.  To connect with a stranger, the user's ID is added to an "available" pool. The server then randomly pairs two users from this pool.
-4.  Once the two users agree to connect, the signaling server helps them exchange the necessary WebRTC metadata (like network information and media capabilities).
-5.  After the initial setup, a direct **peer-to-peer (P2P) connection** is established via WebRTC, and the video/audio data flows directly between the users' browsers.
+Requires Python 3.11+ and Node 18+.
 
------
+**1. Backend**
+```sh
+cd backend
+pip install -r requirements.txt
+python main.py
+# Listening on http://localhost:8000
+```
 
-## Setup and Installation
+**2. Frontend** (separate terminal)
+```sh
+cd frontend
+npm install
+npm run dev
+# Opens http://localhost:5173
+# /socket.io requests are proxied to :8000 automatically
+```
 
-To run this project on your local machine:
+## Production Build
 
-1.  **Clone the repository**:
-    ```sh
-    git clone <your-repository-url>
-    ```
-2.  **Navigate to the project directory**:
-    ```sh
-    cd <your-project-folder>
-    ```
-3.  **Install dependencies**:
-    ```sh
-    npm install
-    ```
-4.  **Start the server**:
-    ```sh
-    node app.js
-    ```
-5.  Open your web browser and go to `http://localhost:3000`.
+```sh
+cd frontend && npm run build
+cd ../backend && python main.py
+```
 
------
+FastAPI serves the built React app from `frontend/dist/` and handles all socket connections on port 8000.
 
-## Deployment
+## Environment Variables
 
-This application is built as a monolithic service where the Node.js server both handles the signaling logic and serves the frontend files. It is designed for deployment on platforms that support persistent Node.js web services.
+Copy `backend/.env.example` to `backend/.env` and set:
 
-**Example for Render**:
-
-  * **Build Command**: `npm install`
-  * **Start Command**: `node app.js`
+| Variable | Default | Description |
+|---|---|---|
+| `PORT` | `8000` | Port the backend listens on |
